@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package router;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.io.*;
 import java.net.*;
 
@@ -17,57 +18,50 @@ import java.net.*;
  */
 public class Router {
     
-	String fileName = "";
-	FileInputStream file = null;
-	InputStreamReader input = null;
-	BufferedReader fileRead = null;
-	String routerName;
-    ArrayList<String> neighbors = new ArrayList<String>();
-    DistanceVector dv = new DistanceVector();
-    ArrayList<HashMap<String, String>> buffer = new ArrayList<HashMap<String, String>>();
-    DatagramSocket sock;
-    int port;
-    InetAddress ip = InetAddress.getByName("localhost");
+	static String fileName = "";
+	static FileInputStream file = null;
+	static InputStreamReader input = null;
+	static BufferedReader fileRead = null;
+	static String routerName;
+    static ArrayList<String> neighbors = new ArrayList<String>();
+    static DistanceVector dv = new DistanceVector();
+    static ArrayList<HashMap<String, String>> buffer = new ArrayList<HashMap<String, String>>();
+    static DatagramSocket sock;
+    static int port;
+    static InetAddress ip;
     static HashMap<String,Integer> portTable = new HashMap<>();
-    int count = 0;
-    Scheduler scheduler;
+    static int count = 0;
+    static Scheduler scheduler;
    
 
-    public Router() {
-        
-    	//port number = args[1]
-    	//filename = args[0]
-    	
-    	//get arguments
-    	boolean inputSuccess = false;
-    	while (!inputSuccess)
-    	{
-    		try 
-    		{
-    			fileName = args[0]; //path of dat file for router
-    			port = args[1]; //router port
-    			inputSuccess = true;
-    		}
-    		catch (Exception e) 
-    		{
-    			System.out.println("Invalid arguments. <FileName> <portNumber>");
-    		}
-    	}
-    	
-    	//get router name and save in its distance vector
-    	String temp[] = filename.split(".");
-    	routerName = temp[0].toUpperCase();
+    public Router() 
+    {
     	dv.setSource(routerName);
+    	try {
+    		InetAddress.getByName("localhost");
+    	}
+    	catch (UnknownHostException e) {}
     	
-    	sock = new DatagramSocket(port);
-    	read_file(fileName, true);
-    	readPorts();
+    	try
+    	{
+    		sock = new DatagramSocket(port);
+    	}
+    	catch (IOException e) {}
+    	
+    	try {
+			read_file(fileName, true);
+		} 
+    	catch (IOException e1) {}
+    	
+    	try {
+			readPorts();
+		} catch (IOException e) {} 
     	
     	scheduler = new Scheduler(15, routerName);
     }
     
     
-    public void read_file(String filename, boolean resetDV){
+    public static void read_file(String filename, boolean resetDV) throws IOException{
         //update DistanceVector
         
         try {
@@ -77,18 +71,25 @@ public class Router {
         }
         catch (IOException e) {}
         
-        int numNeighbors = Integer.parseInt(fileRead.readLine());
+        try {
+			int numNeighbors = Integer.parseInt(fileRead.readLine());
+		} catch (NumberFormatException | IOException e) {}
+		
         HashMap<String, String> tempMap = new HashMap<String, String>();
+        String line;
 
-        while ((line = fileRead.readLine()) != null)
-        {
-        	String[] inputs = line.split(" ");
-        	String name = inputs[0].toUpperCase();
-        	String value = inputs[1];
-        	
-        	neighbors.add(name);
-        	tempMap.put(name, value + "," + routerName);
-        }
+        try {
+			while ((line = fileRead.readLine()) != null)
+			{
+				String[] inputs = line.split(" ");
+				String name = inputs[0].toUpperCase();
+				String value = inputs[1];
+				
+				neighbors.add(name);
+				tempMap.put(name, value + "," + routerName);
+			}
+		} 
+        catch (IOException e) {}
         
         if (resetDV)
         {
@@ -97,17 +98,19 @@ public class Router {
         
         tempMap.clear();
         
-        finally {
-            IOUtils.closeQuietly(fileRead);
-            IOUtils.closeQuietly(input);
-            IOUtils.closeQuietly(file);
-        }
+        fileRead.close();
+        input.close();
+        file.close();
+       
     }
     
-    public void send_update(){
+    public static void send_update(){
     	
     	count++;
-    	read_file(fileName, false);
+    	try {
+			read_file(fileName, false);
+		} 
+    	catch (IOException e1) {}
     	
     	DistanceVector dvCopy = DistanceVector.copy(dv);    	
     	
@@ -116,8 +119,8 @@ public class Router {
     		for (int i = 0; i < neighbors.size(); i++)
     		{
     			poisonReverse(neighbors.get(i), dvCopy);
-    			Byte[] dataOut = DistanceVector.converToBytes(dvCopy);
-    			DatagramPacket pack = new DatagrapmPacket(dataOut, dataOut.length, ip, portTable.get(neighbors.get(i)));
+    			byte[] dataOut = DistanceVector.convertToBytes(dvCopy);
+    			DatagramPacket pack = new DatagramPacket(dataOut, dataOut.length, ip, portTable.get(neighbors.get(i)));
     			sock.send(pack);
     		}
     	}
@@ -127,15 +130,18 @@ public class Router {
     }
     
     
-    public void receive_update()
+    public static void receive_update() throws ClassNotFoundException, IOException
     {
     	//receive a packet and create dv
 		byte[] dataIn = new byte[1024];
 		DatagramPacket pack = new DatagramPacket(dataIn, 1024);
-		sock.receive(pack);
+		try {
+			sock.receive(pack);
+		} 
+		catch (IOException e) {}
 		DistanceVector incomingDV = new DistanceVector();
 		incomingDV = DistanceVector.convertFromBytes(dataIn);  
-		DistanceVector.doDV(dv, incomingDV);
+		DVAlgorithm.doDV(dv, incomingDV);
     }
 
     public static void readPorts() throws FileNotFoundException, IOException {
@@ -149,23 +155,25 @@ public class Router {
             String[] str_array = st.split(" ");
             portTable.put(str_array[0], Integer.parseInt(str_array[1]));
         }
+        
+        br.close();
     }
     
-    public void display()
+    public static void display()
     {
     	 System.out.println("Output Number: " + count);
-         Set keysone = d.vector.keySet();
+         Set keysone = dv.vector.keySet();
          for (Iterator i = keysone.iterator(); i.hasNext();)
          {
              String key = (String) i.next();
-             String value = d.vector.get(key);
-             System.out.println("Shortest path " + d.source + "-" + key+
+             String value = dv.vector.get(key);
+             System.out.println("Shortest path " + dv.source + "-" + key+
                      ": the next hop is "+DistanceVector.getThrough(value)+" and the cost is "+DistanceVector.getDistance(value));
                   
          }
     }
     
-    public void poisonReverse(String SendTo, DistanceVector d){
+    public static void poisonReverse(String SendTo, DistanceVector d){
         Set keysone = d.vector.keySet();
         for (Iterator i = keysone.iterator(); i.hasNext();)
         {
@@ -183,13 +191,33 @@ public class Router {
    
     }
     
-    public static void main(String[] args) 
+    public static void main(String[] args) throws ClassNotFoundException, IOException 
     {
+    	//port number = args[1]
+    	//filename = args[0]
+    	//router name = args[2]
+    	
+    	//get arguments
+    	boolean inputSuccess = false;
+    	while (!inputSuccess)
+    	{
+    		try 
+    		{
+    			fileName = args[0]; //path of dat file for router
+    			port = Integer.parseInt(args[1]); //router port
+    			routerName = args[2];
+    			inputSuccess = true;
+    		}
+    		catch (Exception e) 
+    		{
+    			System.out.println("Invalid arguments. <FileName> <portNumber> <routerName>");
+    		}
+    	}
+    	
     	while (true)
     	{
     		//receive a packet and create dv
     		receive_update();
- 
     	}
     }
     

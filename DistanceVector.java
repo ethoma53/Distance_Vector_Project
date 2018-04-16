@@ -3,8 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package router;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -81,7 +87,7 @@ public class DistanceVector {
         
     }
     
-    private static byte[] convertToBytes(Object object) throws IOException {
+    public static byte[] convertToBytes(Object object) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutput out = new ObjectOutputStream(bos)) {
             out.writeObject(object);
@@ -89,7 +95,7 @@ public class DistanceVector {
         } 
     }
        
-     private static DistanceVector convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+     public static DistanceVector convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
                 ObjectInput in = new ObjectInputStream(bis)) {
             return (DistanceVector)in.readObject();
