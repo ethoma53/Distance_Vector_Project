@@ -49,6 +49,23 @@ public class DistanceVector {
         return Double.parseDouble(part[0]);
             
     }
+    
+    public static DistanceVector copy(DistanceVector d){
+        DistanceVector dcopy = new DistanceVector();
+        dcopy.source = d.source;
+        
+        Set keysone = d.vector.keySet();
+           for(Iterator i = keysone.iterator();i.hasNext();)
+           {
+               String key = (String) i.next();
+               String value= d.vector.get(key);
+               
+               dcopy.vector.put(key, value);
+           }
+        
+        return dcopy;
+    }
+    
     public static void display(DistanceVector d){
         System.out.println("------ "+ d.source+" ---------");
         Set keysone = d.vector.keySet();
@@ -62,6 +79,21 @@ public class DistanceVector {
         
         
         
+    }
+    
+    private static byte[] convertToBytes(Object object) throws IOException {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutput out = new ObjectOutputStream(bos)) {
+            out.writeObject(object);
+            return bos.toByteArray();
+        } 
+    }
+       
+     private static DistanceVector convertFromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+                ObjectInput in = new ObjectInputStream(bis)) {
+            return (DistanceVector)in.readObject();
+        } 
     }
     
     

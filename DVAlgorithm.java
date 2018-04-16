@@ -41,7 +41,7 @@ public class DVAlgorithm {
         //CHECK IF THE NEIGHBORS DISTANCE HAS CHANGED AND UPDATE DISTANCES 
         if(dtoNode!=DistanceVector.getDistance(update.get(currentName)))
         {
-            Double newDist = DistanceVector.getDistance(update.get(currentName));
+           Double newDist = DistanceVector.getDistance(update.get(currentName));
            for(Iterator i = keysone.iterator();i.hasNext();)
            {
                     String keyone = (String) i.next();

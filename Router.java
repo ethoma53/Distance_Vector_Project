@@ -17,6 +17,7 @@ import java.net.*;
  */
 public class Router {
     
+	String fileName = "";
 	FileInputStream file = null;
 	InputStreamReader input = null;
 	BufferedReader fileRead = null;
@@ -25,35 +26,49 @@ public class Router {
     DistanceVector dv = new DistanceVector();
     ArrayList<HashMap<String, String>> buffer = new ArrayList<HashMap<String, String>>();
     DatagramSocket sock;
-    int[] ports = new int[30];
     int port;
     InetAddress ip = InetAddress.getByName("localhost");
-    String[] hops;
+    static HashMap<String,Integer> portTable = new HashMap<>();
+    int count = 0;
+    Scheduler scheduler;
    
-    
-    //ports > 9500
 
     public Router() {
         
-    	port = 9500;
+    	//port number = args[1]
+    	//filename = args[0]
     	
-    	//?
-    	while (isLocalPortInUse())
+    	//get arguments
+    	boolean inputSuccess = false;
+    	while (!inputSuccess)
     	{
-    		port += 10; 
+    		try 
+    		{
+    			fileName = args[0]; //path of dat file for router
+    			port = args[1]; //router port
+    			inputSuccess = true;
+    		}
+    		catch (Exception e) 
+    		{
+    			System.out.println("Invalid arguments. <FileName> <portNumber>");
+    		}
     	}
     	
+    	//get router name and save in its distance vector
+    	String temp[] = filename.split(".");
+    	routerName = temp[0].toUpperCase();
+    	dv.setSource(routerName);
     	
+    	sock = new DatagramSocket(port);
+    	read_file(fileName, true);
+    	readPorts();
     	
+    	scheduler = new Scheduler(15, routerName);
     }
     
     
-    public void read_file(String filename){
+    public void read_file(String filename, boolean resetDV){
         //update DistanceVector
-    	
-    	String temp[] = filename.split(".");
-    	RouterName = temp[0].toUpperCase();
-    	DistanceVector.setSource(routerName);
         
         try {
         	file = new FileInputStream(filename);
@@ -68,14 +83,18 @@ public class Router {
         while ((line = fileRead.readLine()) != null)
         {
         	String[] inputs = line.split(" ");
-        	String name = inputs[0];
+        	String name = inputs[0].toUpperCase();
         	String value = inputs[1];
         	
         	neighbors.add(name);
         	tempMap.put(name, value + "," + routerName);
         }
         
-        dv.vector = tempMap;
+        if (resetDV)
+        {
+        	dv.vector = tempMap;
+        }
+        
         tempMap.clear();
         
         finally {
@@ -84,61 +103,94 @@ public class Router {
             IOUtils.closeQuietly(file);
         }
     }
-
-    public void start(){
-        
-    	while (true)
-    	{
-    		byte[] dataIn = new byte[1024];
-    		DatagramPacket pack = new DatagramPacket(data, 1024);
-    		sock.receive(pack);
-    		int packLen = pack.getLength();
-    		String info = pack.getData().toString(); //?
-    		buffer.add() //convert info to hashmap and add
-    		
-    	}
-    }
     
-    public static void send_update(){
+    public void send_update(){
+    	
+    	count++;
+    	read_file(fileName, false);
+    	
+    	DistanceVector dvCopy = DistanceVector.copy(dv);    	
+    	
     	try 
     	{
     		for (int i = 0; i < neighbors.size(); i++)
     		{
-    			String dataOut = ""; //dv?
-    			DatagramPacket pack = new DatagrapmPacket(dataOut.getBytes(), dataOut.getBytes().length);
-    			packet.setAddress(ip);
-    			packet.setPort(ports[i]);
+    			poisonReverse(neighbors.get(i), dvCopy);
+    			Byte[] dataOut = DistanceVector.converToBytes(dvCopy);
+    			DatagramPacket pack = new DatagrapmPacket(dataOut, dataOut.length, ip, portTable.get(neighbors.get(i)));
     			sock.send(pack);
     		}
     	}
     	catch (IOException e) {}
-    }
-    
-    public void recompute_onRcv(){
-        //read the file - read_file 
-        
-        
-    }
-    
-    public void recompute_onSend(){
-        
     	
+    	display();
     }
     
-    private static boolean isLocalPortInUse(int port) {
-        try {
-            // ServerSocket try to open a LOCAL port
-            new ServerSocket(port).close();
-            // local port can be opened, it's available
-            return false;
-        } catch(IOException e) {
-            // local port cannot be opened, it's in use
-            return true;
+    
+    public void receive_update()
+    {
+    	//receive a packet and create dv
+		byte[] dataIn = new byte[1024];
+		DatagramPacket pack = new DatagramPacket(dataIn, 1024);
+		sock.receive(pack);
+		DistanceVector incomingDV = new DistanceVector();
+		incomingDV = DistanceVector.convertFromBytes(dataIn);  
+		DistanceVector.doDV(dv, incomingDV);
+    }
+
+    public static void readPorts() throws FileNotFoundException, IOException {
+
+        File file = new File("Ports.txt"); 
+
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+        String st;
+        while ((st = br.readLine()) != null) {
+            String[] str_array = st.split(" ");
+            portTable.put(str_array[0], Integer.parseInt(str_array[1]));
         }
     }
     
-    public static void main(String[] args) {
-        // TODO code application logic here
+    public void display()
+    {
+    	 System.out.println("Output Number: " + count);
+         Set keysone = d.vector.keySet();
+         for (Iterator i = keysone.iterator(); i.hasNext();)
+         {
+             String key = (String) i.next();
+             String value = d.vector.get(key);
+             System.out.println("Shortest path " + d.source + "-" + key+
+                     ": the next hop is "+DistanceVector.getThrough(value)+" and the cost is "+DistanceVector.getDistance(value));
+                  
+         }
+    }
+    
+    public void poisonReverse(String SendTo, DistanceVector d){
+        Set keysone = d.vector.keySet();
+        for (Iterator i = keysone.iterator(); i.hasNext();)
+        {
+            String key = (String) i.next();
+            String value = d.vector.get(key);
+            
+            if(SendTo.equals(DistanceVector.getThrough(value))){
+                
+                d.vector.put(key,DistanceVector.createValue(Double.MAX_VALUE, value));
+                
+                
+            }
+           
+        }
+   
+    }
+    
+    public static void main(String[] args) 
+    {
+    	while (true)
+    	{
+    		//receive a packet and create dv
+    		receive_update();
+ 
+    	}
     }
     
 }
