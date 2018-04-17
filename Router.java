@@ -32,35 +32,7 @@ public class Router {
     static HashMap<String,Integer> portTable = new HashMap<>();
     static int count = 0;
     static Scheduler scheduler;
-   
-
-    public Router() 
-    {
-    	dv.setSource(routerName);
-    	try {
-    		InetAddress.getByName("localhost");
-    	}
-    	catch (UnknownHostException e) {}
-    	
-    	try
-    	{
-    		sock = new DatagramSocket(port);
-    	}
-    	catch (IOException e) {}
-    	
-    	try {
-			read_file(fileName, true);
-		} 
-    	catch (IOException e1) {}
-    	
-    	try {
-			readPorts();
-		} catch (IOException e) {} 
-    	
-    	scheduler = new Scheduler(15, routerName);
-    }
-    
-    
+       
     public static void read_file(String filename, boolean resetDV) throws IOException{
         //update DistanceVector
         
@@ -199,6 +171,12 @@ public class Router {
     	
     	//get arguments
     	boolean inputSuccess = false;
+    	
+    	try {
+    		InetAddress.getByName("localhost");
+    	}
+    	catch (UnknownHostException e) {}
+    	
     	while (!inputSuccess)
     	{
     		try 
@@ -213,6 +191,25 @@ public class Router {
     			System.out.println("Invalid arguments. <FileName> <portNumber> <routerName>");
     		}
     	}
+    	
+    	dv.setSource(routerName);
+    	
+    	try
+    	{
+    		sock = new DatagramSocket(port);
+    	}
+    	catch (IOException e) {}
+    	
+    	try {
+			read_file(fileName, true);
+		} 
+    	catch (IOException e1) {}
+    	
+    	try {
+			readPorts();
+		} catch (IOException e) {} 
+    	
+    	scheduler = new Scheduler(15, routerName);
     	
     	while (true)
     	{
