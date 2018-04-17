@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+package project3ccn;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,7 +25,7 @@ public class Scheduler {
    
     class SenderTimerTask extends TimerTask {
         public void run() {
-            
+            System.out.println("Run");
             Router.send_update();
             
         }

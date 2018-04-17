@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+package project3ccn;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,7 +47,7 @@ public class DVAlgorithm {
                     String keyone = (String) i.next();
            
                     String via = DistanceVector.getThrough(current.get(keyone));
-                    Double updatedDist = newDist + DistanceVector.getDistance(update.get(keyone));
+                    Double updatedDist = newDist+ DistanceVector.getDistance(update.get(keyone));
                     
                     if(via.equalsIgnoreCase(updateName)){
                         current.put(keyone, DistanceVector.createValue(updatedDist, keyone));
