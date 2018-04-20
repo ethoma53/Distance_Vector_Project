@@ -16,20 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sun.misc.IOUtils;
 
-/**
- *
- * static InputStreamReader input = null; static BufferedReader fileRead = null;
- * static String routerName; static ArrayList<String> neighbors = new
- * ArrayList<String>(); static DistanceVector dv = new DistanceVector(); static
- * ArrayList<HashMap<String, String>> buffer = new
- * ArrayList<HashMap<String, String>>(); static DatagramSocket Sendsock; static
- * DatagramSocket Rcvsock; static int port;
- *
- * static InetAddress ip; static HashMap<String, Integer> portTable = new
- * HashMap<>(); static int count = 0; static Scheduler scheduler;
- *
- * @author sg chowdhury
- */
+
 public class Router {
 
     static String fileName = "";
@@ -109,12 +96,14 @@ public class Router {
             }
         }
 
-        DistanceVector dvCopy = DistanceVector.copy(dv);
+        
 
         try {
             for (int i = 0; i < neighbors.size(); i++) {
-                poisonReverse(neighbors.get(i), dvCopy);
+                DistanceVector dvCopy = DistanceVector.copy(dv);
+                
                 if (!neighbors.get(i).equals(routerName)) {
+                    poisonReverse(neighbors.get(i), dvCopy);
                     dataOut = DistanceVector.convertToBytes(dvCopy);
                     int portno = portTable.get(neighbors.get(i)) + 1;
                     DatagramPacket pack = new DatagramPacket(dataOut, dataOut.length, ip, portno);
