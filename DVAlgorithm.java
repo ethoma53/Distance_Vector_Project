@@ -11,7 +11,8 @@ import java.util.Set;
 
 /**
  *
- * @author sg chowdhury
+ * @author shrirupa chowdhury
+ * @author lizzy thomas
  */
 public class DVAlgorithm {
 
@@ -42,9 +43,9 @@ public class DVAlgorithm {
         if(dtoNode!=DistanceVector.getDistance(update.get(currentName)))
         {
            Double newDist = DistanceVector.getDistance(update.get(currentName));
-           for(Iterator i = keysone.iterator();i.hasNext();)
-           {
-                    String keyone = (String) i.next();
+          for(Iterator i = keysone.iterator();i.hasNext();)
+          {
+                   String keyone = (String) i.next();
            
                     String via = DistanceVector.getThrough(current.get(keyone));
                     Double updatedDist = newDist+ DistanceVector.getDistance(update.get(keyone));

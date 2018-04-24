@@ -19,7 +19,8 @@ import java.util.Set;
 
 /**
  *
- * @author sg chowdhury
+ * @author shirupa chowdhury
+ * @author lizzy thomas
  */
 public class DistanceVector implements Serializable {
     String source;

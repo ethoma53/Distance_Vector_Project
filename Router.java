@@ -16,6 +16,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sun.misc.IOUtils;
 
+/**
+ *
+ * @author shirupa chowdhury
+ * @author lizzy thomas
+ */
 
 public class Router {
 
@@ -144,7 +149,7 @@ public class Router {
 
     public static void readPorts() throws FileNotFoundException, IOException {
 
-        File file = new File("D:\\Ports1.txt");
+        File file = new File("D:\\Ports.txt");
 
         BufferedReader br = new BufferedReader(new FileReader(file));
 

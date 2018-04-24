@@ -10,7 +10,8 @@ import java.util.TimerTask;
 
 /**
  *
- * @author sg chowdhury
+ * @author shirupa chowdhury
+ * @author lizzy thomas
  */
 public class Scheduler {
     Timer timer;
