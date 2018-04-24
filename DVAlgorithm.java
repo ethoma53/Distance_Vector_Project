@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class DVAlgorithm {
 
-    public static DistanceVector Result = new DistanceVector();
+    public static DistanceVector Result ;
 
     
 
@@ -29,6 +29,8 @@ public class DVAlgorithm {
         
         
         */
+        Result = new DistanceVector();
+        
         HashMap<String, String> current = DV.vector;
         String currentName = DV.source;
         HashMap<String, String> update = UPDATE.vector;
@@ -37,26 +39,26 @@ public class DVAlgorithm {
         Double dtoNode = DistanceVector.getDistance(current.get(updateName)) ;
         
         //iterate over current vector
-        Set keysone = current.keySet();
+//        Set keysone = current.keySet();
         
-        //CHECK IF THE NEIGHBORS DISTANCE HAS CHANGED AND UPDATE DISTANCES 
-        if(dtoNode!=DistanceVector.getDistance(update.get(currentName)))
-        {
-           Double newDist = DistanceVector.getDistance(update.get(currentName));
-          for(Iterator i = keysone.iterator();i.hasNext();)
-          {
-                   String keyone = (String) i.next();
-           
-                    String via = DistanceVector.getThrough(current.get(keyone));
-                    Double updatedDist = newDist+ DistanceVector.getDistance(update.get(keyone));
-                    
-                    if(via.equalsIgnoreCase(updateName)){
-                        current.put(keyone, DistanceVector.createValue(updatedDist, keyone));
-                    }
-           }
-            
-            
-        }
+//        //CHECK IF THE NEIGHBORS DISTANCE HAS CHANGED AND UPDATE DISTANCES 
+//        if(dtoNode!=DistanceVector.getDistance(update.get(currentName)))
+//        {
+//           Double newDist = DistanceVector.getDistance(update.get(currentName));
+//          for(Iterator i = keysone.iterator();i.hasNext();)
+//          {
+//                   String keyone = (String) i.next();
+//           
+//                    String via = DistanceVector.getThrough(current.get(keyone));
+//                    Double updatedDist = newDist+ DistanceVector.getDistance(update.get(keyone));
+//                    
+//                    if(via.equalsIgnoreCase(updateName)){
+//                        current.put(keyone, DistanceVector.createValue(updatedDist, keyone));
+//                    }
+//           }
+//            
+//            
+//        }
         
         Set keys = update.keySet();
         

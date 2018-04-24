@@ -52,6 +52,14 @@ public class DistanceVector implements Serializable {
         
         
     }
+
+    public DistanceVector() {
+        source = "";
+        vector = new HashMap<>();
+        
+    }
+
+   
     public static Double getDistance(String tuple)
     {
         String[] part = tuple.split(",", 2); 

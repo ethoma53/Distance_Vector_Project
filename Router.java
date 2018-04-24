@@ -21,7 +21,6 @@ import sun.misc.IOUtils;
  * @author shirupa chowdhury
  * @author lizzy thomas
  */
-
 public class Router {
 
     static String fileName = "";
@@ -74,6 +73,18 @@ public class Router {
         if (resetDV) {
             dv.vector = (HashMap<String, String>) tempMap.clone();
             vectorMade = true;
+        } else{
+			Set keysone = dv.vector.keySet();
+			
+			for (Iterator i = keysone.iterator(); i.hasNext();) {
+				String key = (String) i.next();
+				String value = dv.vector.get(key);
+				
+				if (tempMap.get(key) != value && tempMap.get(key)!=null)
+				{
+					dv.vector.put(key, tempMap.get(key));
+				}
+			}
         }
 
         tempMap.clear();
@@ -101,12 +112,10 @@ public class Router {
             }
         }
 
-        
-
         try {
             for (int i = 0; i < neighbors.size(); i++) {
                 DistanceVector dvCopy = DistanceVector.copy(dv);
-                
+
                 if (!neighbors.get(i).equals(routerName)) {
                     poisonReverse(neighbors.get(i), dvCopy);
                     dataOut = DistanceVector.convertToBytes(dvCopy);
