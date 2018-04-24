@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package project3ccn;
+//package project3ccn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +70,10 @@ public class Router {
             tempMap.put(name, value + "," + routerName);
         }
 
-        if (resetDV) {
+		ArrayList<String> abcd = new ArrayList<>();
+		ArrayList<String> oldValues = new ArrayList<>();
+        
+		if (resetDV) {
             dv.vector = (HashMap<String, String>) tempMap.clone();
             vectorMade = true;
         } else{
@@ -80,12 +83,45 @@ public class Router {
 				String key = (String) i.next();
 				String value = dv.vector.get(key);
 				
-				if (tempMap.get(key) != value && tempMap.get(key)!=null)
+				if (tempMap.get(key) != value && tempMap.get(key)!=null && DistanceVector.getThrough(value).equals(routerName))
 				{
+					abcd.add(key);
+					String oldValue = value;
+					oldValues.add(oldValue);
 					dv.vector.put(key, tempMap.get(key));
 				}
 			}
+			
+			for (int i = 0; i < abcd.size(); i++)
+			{
+				Set keystwo = dv.vector.keySet();
+			
+					for (Iterator j = keystwo.iterator(); j.hasNext();) {
+						String key2 = (String) j.next();
+						String value2 = dv.vector.get(key2);
+						
+						
+						System.out.println(value2);
+						System.out.println(abcd.get(i));
+						System.out.println(oldValues.get(i));
+						//System.out.println(value);
+		
+						if (DistanceVector.getThrough(value2).equals(abcd.get(i)))
+							//&& Math.abs((DistanceVector.getDistance(oldValue) - DistanceVector.getDistance(value))) > 0.1)
+						{
+							double newD = DistanceVector.getDistance(value2) 
+							- DistanceVector.getDistance(oldValues.get(i)) + DistanceVector.getDistance(dv.vector.get(abcd.get(i)));
+							
+							//test
+							//System.out.println("key2: " + key2 + " value2: " + DistanceVector.getDistance(value2) + " oldValue: "
+							//	+ DistanceVector.getDistance(oldValue) + " value: " + DistanceVector.getDistance(value));
+							
+							dv.vector.put(key2, DistanceVector.createValue(newD, abcd.get(i)));
+						}
+					}
+			}
         }
+	
 
         tempMap.clear();
         fileRead.close();
@@ -158,7 +194,7 @@ public class Router {
 
     public static void readPorts() throws FileNotFoundException, IOException {
 
-        File file = new File("D:\\Ports.txt");
+        File file = new File("Ports.txt");
 
         BufferedReader br = new BufferedReader(new FileReader(file));
 
